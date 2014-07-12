@@ -1,6 +1,6 @@
 <?php
 require 'Slim/Slim.php';
-require 'Brainly/JValidator/Validator.php';
+require 'Brainly/JValidator/Validator.php'; // Using JSON schema validator from https://github.com/brainly/jvalidator
 \Slim\Slim::registerAutoloader();
 
 $validator = new Brainly\JValidator\Validator();
@@ -105,6 +105,7 @@ function updateQuestion($id) {
 }
 
 function deleteQuestion($id) {
+	global $app;
 	$sql = "DELETE FROM questions WHERE id = :id";
 	try {
 		$db = getConnection();
@@ -113,7 +114,7 @@ function deleteQuestion($id) {
 		$stat = $query->execute();	
 		
 		$db=null;
-		
+		$app->response()->status(204);
 		echo json_encode($stat);
 		
 	} catch(PDOException $e) {
@@ -123,13 +124,15 @@ function deleteQuestion($id) {
 }
 
 function getQuestions() {
+	global $app;
+	
 	$sql = "SELECT * FROM questions";
 	try {
 		$db = getConnection();
 		$query = $db->query($sql);
 		$questions = $query->fetchAll(PDO::FETCH_OBJ);
 		$db = null;		
-		
+		$app->response()->status(201);
 		echo json_encode($questions);
 			
 		
@@ -178,7 +181,7 @@ function createQuestion() {
 		$query->execute();
 				
 		$db = null;
-		http_response_code(201);
+		$app->response()->status(201);
 		echo json_encode(array("id"=>$id, "name"=>$request->name, "type"=>$request->type));
 	} catch (PDOException $e) {
 		echo '{"error": {"text":'. $e->getMessage().'}}';
@@ -187,6 +190,8 @@ function createQuestion() {
 
 
 function getAnswer($id) {
+	global $app;
+	
 	$sql = "SELECT text, type FROM answers WHERE id = :id";
 	try {
 		$db = getConnection();
@@ -197,7 +202,7 @@ function getAnswer($id) {
 		
 		$answer = $query->fetchObject();
 		$db = null;
-		
+		$app->response()->status(201);
 		echo json_encode($answer);
 		
 
@@ -221,6 +226,7 @@ function updateAnswer($id) {
 		$status = $query->execute();
 				
 		$db = null;
+		$app->response()->status(201);
 		echo json_encode(array("status"=>$status));
 		
 	} catch (PDOException $e) {
@@ -269,7 +275,7 @@ function createAnswertoQuestion($id) {
 		$query->execute();
 				
 		$db = null;
-		http_response_code(201);
+		$app->response()->status(201);
 		echo json_encode(array("text"=>$request->text, "id"=>$answer_id, "type"=>$request->type));
 		
 		
@@ -281,6 +287,7 @@ function createAnswertoQuestion($id) {
 }
 
 function removeAnswertoQuestion($id) {
+	global $app;
 	$sql = "DELETE FROM answers WHERE question_id = :id";
 	try {
 		$db = getConnection();
@@ -289,7 +296,7 @@ function removeAnswertoQuestion($id) {
 		$stat = $query->execute();	
 		
 		$db=null;
-		
+		$app->response()->status(201);
 		echo json_encode($stat);
 		
 	} catch(PDOException $e) {
