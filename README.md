@@ -1,4 +1,9 @@
-DB
+# Database configuration
+
+open index.php
+Scroll all the way down to find "function getConnection()"
+
+## SQL
 
 DROP TABLE IF EXIST `questions`, `answers`;
 
@@ -21,16 +26,11 @@ CREATE TABLE `answers` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-
-Database configuration
-
-open index.php
-Scroll all the way down to find "function getConnection()"
-
+# Blueprint
 
 FORMAT: 1A
 
-# Question/Answer API
+## Question/Answer API
 This is a [RESTful](http://en.wikipedia.org/wiki/Representational_state_transfer) [Application Programming Interface (API)](http://en.wikipedia.org/wiki/Application_programming_interface) to the question/answer database.
 
 ## Media Types
