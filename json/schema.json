@@ -1,0 +1,53 @@
+{
+   "required" : [
+      "type",
+      "name"
+   ],
+   "title" : "Question",
+   "type" : "object",
+   "properties" : {
+      "name" : {
+         "minimum" : 1,
+         "maximum" : 255,
+         "type" : "string"
+      },
+      "responses" : {
+         "minitems" : 1,
+         "type" : "array",
+         "unique_items" : true,
+         "items" : {
+            "type" : "string"
+         }
+      },
+      "type" : {
+         "type" : {
+            "enum" : [
+               "checkbox",
+               "currency",
+               "date",
+               "datetimetz",
+               "float",
+               "document",
+               "email",
+               "text",
+               "hyperlink",
+               "url",
+               "integer",
+               "select",
+               "clobtext",
+               "multiselect",
+               "percent",
+               "phone",
+               "richtext",
+               "textarea",
+               "timeofday"
+            ]
+         }
+      },
+      "placeholder" : {
+         "minimum" : 1,
+         "maximum" : 255,
+         "type" : "string"
+      }
+   }
+}
