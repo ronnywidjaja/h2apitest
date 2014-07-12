@@ -1,3 +1,33 @@
+DB
+
+DROP TABLE IF EXIST `questions`, `answers`;
+
+CREATE TABLE `questions` (
+  `id` varchar(100) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(100) NOT NULL,
+  `responses` text,
+  `placeholder` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `answers` (
+  `id` varchar(100) NOT NULL,
+  `text` text NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `question_id` varchar(100) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+Database configuration
+
+open index.php
+Scroll all the way down to find "function getConnection()"
+
+
 FORMAT: 1A
 
 # Question/Answer API
