@@ -32,6 +32,73 @@ function home() {
 	echo '{ "message" : "System is ready"} }';
 }
 
+
+function getQuestions() {
+	global $app;
+	
+	$sql = "SELECT id, name, responses, type FROM questions";
+	try {
+		$db = getConnection();
+		$query = $db->query($sql);
+		$questions = $query->fetchAll(PDO::FETCH_OBJ);
+		$db = null;		
+		$app->response()->status(201);
+		echo json_encode($questions);
+			
+		
+	} catch (PDOException $e) {
+		echo '{"error": {"text":'. $e->getMessage().'}}';
+	}
+}
+
+function createQuestion() {
+
+	$id = md5(microtime().rand());	
+	
+	global $app, $validator, $schema;
+	$json = $app->request->getBody();
+    $validator->validate($json, $schema);
+
+    if ($validator->getResultCode() != 0) {
+	    echo json_encode($validator->getValidationErrors()); die();
+    }
+	
+	$request = json_decode($app->request->getBody());
+	
+	// fix schema validation error that "responses" has to be "String"
+	if (!empty($request->responses)) :
+		$response = array();	
+		foreach ($request->responses as $r) {
+			$response[] = json_encode($r);
+		}
+		$request->responses = $response;
+		
+		// save "responses" in json format to mysql db
+		$responses = json_encode($request->responses);	
+	endif;
+	
+
+	
+    $sql = "INSERT INTO questions (id, name, type, responses, placeholder) VALUES (:id, :name, :type, :responses, :placeholder)";
+	try {
+		$db = getConnection();
+		$query = $db->prepare($sql);
+		$query->bindParam("name", $request->name);
+		$query->bindParam("type", $request->type);
+		$query->bindParam("responses", $request->responses);
+		$query->bindParam("placeholder", $request->placeholder);
+		$query->bindParam("id", $id);
+		$query->execute();
+				
+		$db = null;
+		$app->response()->status(201);
+		echo json_encode(array("id"=>$id, "name"=>$request->name, "type"=>$request->type));
+	} catch (PDOException $e) {
+		echo '{"error": {"text":'. $e->getMessage().'}}';
+	}
+}
+
+
 function getQuestion($id) {
 	
     $sql = "SELECT type, responses, placeholder FROM questions WHERE id = :id";
@@ -121,71 +188,6 @@ function deleteQuestion($id) {
 		echo '{"error":{"text":'. $e->getMessage() .'}}';
 	}
 	
-}
-
-function getQuestions() {
-	global $app;
-	
-	$sql = "SELECT * FROM questions";
-	try {
-		$db = getConnection();
-		$query = $db->query($sql);
-		$questions = $query->fetchAll(PDO::FETCH_OBJ);
-		$db = null;		
-		$app->response()->status(201);
-		echo json_encode($questions);
-			
-		
-	} catch (PDOException $e) {
-		echo '{"error": {"text":'. $e->getMessage().'}}';
-	}
-}
-
-function createQuestion() {
-
-	$id = md5(microtime().rand());	
-	
-	global $app, $validator, $schema;
-	$json = $app->request->getBody();
-    $validator->validate($json, $schema);
-
-    if ($validator->getResultCode() != 0) {
-	    echo json_encode($validator->getValidationErrors()); die();
-    }
-	
-	$request = json_decode($app->request->getBody());
-	
-	// fix schema validation error that "responses" has to be "String"
-	if (!empty($request->responses)) :
-		$response = array();	
-		foreach ($request->responses as $r) {
-			$response[] = json_encode($r);
-		}
-		$request->responses = $response;
-		
-		// save "responses" in json format to mysql db
-		$responses = json_encode($request->responses);	
-	endif;
-	
-
-	
-    $sql = "INSERT INTO questions (id, name, type, responses, placeholder) VALUES (:id, :name, :type, :responses, :placeholder)";
-	try {
-		$db = getConnection();
-		$query = $db->prepare($sql);
-		$query->bindParam("name", $request->name);
-		$query->bindParam("type", $request->type);
-		$query->bindParam("responses", $request->responses);
-		$query->bindParam("placeholder", $request->placeholder);
-		$query->bindParam("id", $id);
-		$query->execute();
-				
-		$db = null;
-		$app->response()->status(201);
-		echo json_encode(array("id"=>$id, "name"=>$request->name, "type"=>$request->type));
-	} catch (PDOException $e) {
-		echo '{"error": {"text":'. $e->getMessage().'}}';
-	}
 }
 
 

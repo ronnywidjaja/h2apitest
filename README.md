@@ -5,7 +5,7 @@ Scroll all the way down to find "function getConnection()"
 
 ## SQL
 
-DROP TABLE IF EXIST `questions`, `answers`;
+DROP TABLE IF EXISTS `questions`, `answers`;
 
 CREATE TABLE `questions` (
   `id` varchar(100) NOT NULL,
