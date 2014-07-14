@@ -29,7 +29,12 @@ $app->delete('/question/:id/answers', 'removeAnswertoQuestion');
 $app->run();
 
 function home() {
-	echo '{ "message" : "System is ready"} }';
+	try {
+		$db = getConnection();
+		echo json_encode(array("message"=>"System is ready"));
+	} catch (PDOException $e) {		
+		echo json_encode(array("code"=>$e->getCode(), "error"=>$e->getMessage()));
+	}	
 }
 
 
@@ -43,8 +48,15 @@ function getQuestions() {
 		$questions = $query->fetchAll(PDO::FETCH_OBJ);
 		$db = null;		
 		$app->response()->status(201);
+		
+		// convert array string from mysql to json object
+		foreach ($questions as &$q) {
+			$q->responses = json_decode($q->responses);
+			foreach ($q->responses as &$response) {
+				$response = json_decode($response);
+			}
+		}
 		echo json_encode($questions);
-			
 		
 	} catch (PDOException $e) {
 		echo '{"error": {"text":'. $e->getMessage().'}}';
@@ -130,6 +142,9 @@ function updateQuestion($id) {
 		// fix schema validation error that "responses" has to be "String"
 		$response = array();	
 		foreach ($request->responses as $r) {
+			$response_id = md5(microtime().rand());
+			$r->id = $response_id;
+			$r->question_id = $id;
 			$response[] = json_encode($r);
 		}
 		$request->responses = $response;	
@@ -151,7 +166,8 @@ function updateQuestion($id) {
 				name = IF (:name IS NOT NULL, :name, name), 
 				type = IF (:type IS NOT NULL, :type, type), 
 				responses = IF (:responses IS NOT NULL, :responses, responses), 
-				placeholder= IF (:placeholder IS NOT NULL, :placeholder, placeholder) WHERE id = :id";
+				placeholder = IF (:placeholder IS NOT NULL, :placeholder, placeholder) 
+			WHERE id = :id";
 	try {
 		$db = getConnection();
 		$query = $db->prepare($sql);
@@ -160,10 +176,10 @@ function updateQuestion($id) {
 		$query->bindParam("responses", $responses);
 		$query->bindParam("placeholder", $request->placeholder);
 		$query->bindParam("id", $id);
-		$status = $query->execute();
+		//$status = $query->execute();
 				
 		$db = null;
-		echo json_encode(array("status"=>$status));
+		//echo json_encode(array("status"=>$status));
 		
 	} catch (PDOException $e) {
 		echo '{"error": {"text":'. $e->getMessage().'}}';
@@ -225,11 +241,11 @@ function updateAnswer($id) {
 		$query = $db->prepare($sql);
 		$query->bindParam("text", $request->text);
 		$query->bindParam("id", $id);
-		$status = $query->execute();
+		//$status = $query->execute();
 				
 		$db = null;
 		$app->response()->status(201);
-		echo json_encode(array("status"=>$status));
+		//echo json_encode(array("status"=>$status));
 		
 	} catch (PDOException $e) {
 		echo '{"error": {"text":'. $e->getMessage().'}}';
