@@ -47,16 +47,18 @@ function getQuestions() {
 		$query = $db->query($sql);
 		$questions = $query->fetchAll(PDO::FETCH_OBJ);
 		$db = null;		
-		$app->response()->status(201);
 		
-		// convert array string from mysql to json object
+		// question "responses" are stored in database as string (varchar)
+		// we need to convert the string to json object
 		foreach ($questions as &$q) {
 			$q->responses = json_decode($q->responses);
 			foreach ($q->responses as &$response) {
 				$response = json_decode($response);
 			}
 		}
-		echo json_encode($questions);
+		
+		$app->response()->status(201); 
+		echo json_encode($questions); // output
 		
 	} catch (PDOException $e) {
 		echo '{"error": {"text":'. $e->getMessage().'}}';
@@ -64,28 +66,28 @@ function getQuestions() {
 }
 
 function createQuestion() {
-
-	$id = md5(microtime().rand());	
-	
 	global $app, $validator, $schema;
-	$json = $app->request->getBody();
-    $validator->validate($json, $schema);
+	
+	$id = md5(microtime().rand());	// create random id
+		
+	$json = $app->request->getBody(); // post data
+    $validator->validate($json, $schema); // validate data with schema
 
-    if ($validator->getResultCode() != 0) {
-	    echo json_encode($validator->getValidationErrors()); die();
+    if ($validator->getResultCode() != 0) { // check if not valid
+	    echo json_encode($validator->getValidationErrors()); die(); // show error
     }
 	
-	$request = json_decode($app->request->getBody());
-	
+	$request = json_decode($json);
+	 
 	// fix schema validation error that "responses" has to be "String"
 	if (!empty($request->responses)) :
 		$response = array();	
 		foreach ($request->responses as $r) {
-			$response[] = json_encode($r);
+			$response[] = json_encode($r);			
 		}
 		$request->responses = $response;
 		
-		// save "responses" in json format to mysql db
+		// then save "responses" as json format to mysql db
 		$responses = json_encode($request->responses);	
 	endif;
 	
