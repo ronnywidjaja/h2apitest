@@ -1,4 +1,12 @@
-# Database configuration
+# Description
+This API was coded using Slim php framework (http://www.slimframework.com/).
+
+I decided to use Slim for this test because the Slim framework is the fastest way to help create a simple Restful API.
+All the code and configuration are located in "index.php" file, in the root folder.
+
+Here's the link to a running demo: http://ronnywidjaja.com/h2w/api/
+
+## Database configuration
 
 open index.php
 Scroll all the way down to find "function getConnection()"
@@ -26,7 +34,7 @@ CREATE TABLE `answers` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-# Blueprint
+# Test Questions API Blueprint
 
 FORMAT: 1A
 
